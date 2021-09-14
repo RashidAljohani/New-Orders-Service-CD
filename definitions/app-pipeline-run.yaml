@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: app-pipeline-101  
+  labels:
+    tekton.dev/pipeline: app-pipeline
+spec:
+  pipelineRef:
+    name: app-pipeline
+  resources:
+    - name: git-repo
+      resourceRef:
+        name: git-repo
+    - name: container-image
+      resourceRef:
+        name: container-image
+  serviceAccountName: pipeline
