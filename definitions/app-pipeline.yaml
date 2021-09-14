@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: app-pipeline
+spec:
+  resources:
+    - name: git-repo
+      type: git
+    - name: container-image
+      type: image
+  tasks:
+    - name: build-image
+      resources:
+        inputs:
+          - name: source
+            resource: git-repo
+          - name: image
+            resource: container-image
+      taskRef:
+        kind: Task
+        name: build-push
+    - name: deploy-app
+      resources:
+        inputs:
+          - name: image
+            resource: container-image
+      runAfter:
+        - build-image
+      taskRef:
+        kind: Task
+        name: push-container-registry
