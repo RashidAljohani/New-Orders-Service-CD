@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: app-pipeline
+  namespace: new-orders-sit
+spec:
+  resources:
+    - name: git-resource
+      type: git
+    - name: image-resource
+      type: image
+  tasks:
+    - name: build-push
+      resources:
+        inputs:
+          - name: source
+            resource: git-resource
+          - name: image
+            resource: image-resource
+      taskRef:
+        kind: Task
+        name: build-push
+    - name: deploy-app
+      resources:
+        inputs:
+          - name: image
+            resource: image-resource
+      runAfter:
+        - build-image
+      taskRef:
+        kind: Task
+        name: deploy-app
