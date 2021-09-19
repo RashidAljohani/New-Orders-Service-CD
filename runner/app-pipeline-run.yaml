@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: app-pipeline-demo-01
+  namespace: new-orders-sit
+  labels:
+    tekton.dev/pipeline: app-pipeline
+spec:
+  pipelineRef:
+    name: app-pipeline
+  resources:
+    - name: git-resource
+      resourceRef:
+        name: git-resource
+    - name: image-resource
+      resourceRef:
+        name: image-resource
+  serviceAccountName: pipeline
