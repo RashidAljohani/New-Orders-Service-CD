@@ -1,0 +1,47 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: deploy-app
+  namespace: new-orders-sit
+spec:
+  resources:
+    inputs:
+      - name: image
+        type: image
+  steps:
+    - image: 'quay.io/openshift/origin-cli:latest'
+      name: deploy
+      resources: {}
+      script: |
+        cat << EOF | oc apply -f -
+            apiVersion: appconnect.ibm.com/v1beta1
+            kind: IntegrationServer
+            metadata:
+              name: new-order-app-demo-01
+            spec:
+              enableMetrics: true
+              license:
+                accept: true
+                license: L-KSBM-C37JH7
+                use: AppConnectEnterpriseNonProduction
+              pod:
+                containers:
+                  runtime:
+                    image: $(resources.inputs.image.url):0.0.2
+                    resources:
+                      limits:
+                        cpu: 300m
+                        memory: 350Mi
+                      requests:
+                        cpu: 300m
+                        memory: 300Mi
+              adminServerSecure: false
+              router:
+                timeout: 120s
+              designerFlowsOperationMode: disabled
+              createDashboardUsers: true
+              service:
+                endpointType: http
+              replicas: 1
+              version: 12.0.1.0-r3
+        EOF
