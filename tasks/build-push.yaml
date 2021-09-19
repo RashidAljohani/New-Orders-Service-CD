@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-push
+  namespace: new-orders-sit
+spec:
+  params:
+    - default: registry.redhat.io/rhel8/buildah
+      description: The location of the buildah builder image.
+      name: BUILDER_IMAGE
+      type: string
+    - default: ./Dockerfile
+      description: Path to the Dockerfile to build.
+      name: DOCKERFILE
+      type: string
+    - default: 'false'
+      description: Verify the TLS on the registry endpoint
+      name: TLSVERIFY
+      type: string
+  resources:
+    inputs:
+      - name: source
+        type: git
+      - name: image
+        type: image
+  steps:
+    - image: $(params.BUILDER_IMAGE)
+      name: build
+      resources: {}
+      script: |
+        . ./release
+        buildah bud --storage-driver=vfs --format=oci \
+          --tls-verify=$(params.TLSVERIFY) --layers \
+          -f $(params.DOCKERFILE) -t $(resources.inputs.image.url):$release .
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+      workingDir: /workspace/source
+    - image: $(params.BUILDER_IMAGE)
+      name: push
+      resources: {}
+      script: |
+        . ./release
+        buildah push --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) \
+          $(resources.inputs.image.url):$release \
+          'docker://$(resources.inputs.image.url)':$release
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+      workingDir: /workspace/source
+  volumes:
+    - emptyDir: {}
+      name: varlibcontainers
