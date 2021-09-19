@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: image-resource
+  namespace: new-orders-sit
+spec:
+  params:
+    - name: url
+      value: quay.io/raljohani/new-orders-sit
+  type: image
