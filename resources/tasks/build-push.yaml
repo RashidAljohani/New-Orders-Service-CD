@@ -2,7 +2,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: build-push
-  namespace: new-orders-sit
 spec:
   params:
     - default: registry.redhat.io/rhel8/buildah
