@@ -27,7 +27,7 @@ spec:
               pod:
                 containers:
                   runtime:
-                    image: $(resources.inputs.image.url):0.0.2
+                    image: $(resources.inputs.image.url)
                     resources:
                       limits:
                         cpu: 300m
